@@ -163,10 +163,16 @@ export function createConwayClient(options: ConwayClientOptions): ConwayClient {
     }
   };
 
-  const resolveLocalPath = (filePath: string): string =>
-    filePath.startsWith("~")
-      ? nodePath.join(process.env.HOME || "/root", filePath.slice(1))
-      : filePath;
+  const resolveLocalPath = (filePath: string): string => {
+    if (filePath.startsWith("~")) {
+      return nodePath.join(process.env.HOME || "/root", filePath.slice(1));
+    }
+    if (filePath.startsWith("/root/") || filePath === "/root") {
+      const rel = filePath.slice("/root".length);
+      return nodePath.join(process.env.HOME || "/root", rel);
+    }
+    return filePath;
+  };
 
   const writeFile = async (
     filePath: string,
